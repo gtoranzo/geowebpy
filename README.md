@@ -30,13 +30,11 @@ $ python manage.py runserver
 $ http://127.0.0.1:8000/
 ```
 
-### Error.
+### Migraciones no aplicadas
 
-En caso de error:
-You have 18 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): admin, auth, contenttypes, sessions.
-Run 'python manage.py migrate' to apply them.
+Migraciones no aplicadas. Es posible que su proyecto no funcione correctamente hasta que aplique las migraciones para aplicaciones: administrador, autenticación, tipos de contenido, sesiones.
 
-En la consola ejecuta el siguiente comando:
+Ejecute en la consola el siguiente comando:
 
 ```
 $ python manage.py migrate
