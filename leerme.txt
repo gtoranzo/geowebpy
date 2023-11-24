@@ -1,0 +1,241 @@
+Tutorial de desarrollo de aplicaciones web geoespaciales con Python y Django
+
+Este es el procedimiento completo en Windows con Anaconda:
+1 - Abra su indicador de Anaconda e instale Django y folium.
+pip install Django
+pip install folium
+
+2 - Vaya a la ubicación donde desea que se cree su proyecto
+
+3 - Crea el proyecto “geo”
+
+4 - Mover al directorio creado
+
+cd geo
+5 - Crea la aplicación Django “geoApp”
+
+python administrar.py iniciar aplicación geoApp
+6 - Crea el archivo “urls.py” dentro de geoApp
+
+7- Dentro de “geoApp/urls.py”, pegue las siguientes líneas
+from django.urls import path
+from django.contrib.auth import views as auth_views
+from . import views
+urlpatterns = [
+    path('', views.home,name='home'),
+    ]
+8 - Ahora tenemos que registrar este “geoApp/urls.py” dentro de “geo/urls.py”, agregar “incluir” a “Django.urls”
+from django.urls import path, include
+
+agregue la siguiente línea a "urlspatterns" 
+
+path('',include('geoApp.urls')),
+
+Ahora tienes algo como esto: 
+from django.contrib import admin
+from django.urls import path, include
+ urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('',include('geoApp.urls')),
+    ]
+9 - Dentro de “geoApp”:
+Crea una carpeta llamada “templates”
+Dentro de “templates” crea una carpeta llamada “geoApp”
+
+10 - Antes de configurar los archivos “HTML”, definamos los archivos “static” y la “path”. En “/geo/settings.py”
+Primero, en la parte superior del archivo agregue
+import os
+busque "STATIC_URL", se encuentra al final del archivo y reemplácelo con los siguientes comandos
+
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+ 
+11 - Agrega las carpetas “static” y “media” en la carpeta raíz:
+12 - Dentro de la carpeta “static”, pegue la carpeta “dist” que está dentro del Framework “bootstrap” (https://github.com/twbs/bootstrap/dist/), renombrándola y en “jquery”, el archivo “jquery-3.7.1.slim.min.js” de (https://jquery.com/download/).
+13 - Regrese a “settings.py”, y en “INSTALLED_APPS” agregue:
+'geoApp',
+14 - Continuando en el archivo “settings.py”, en “DIRS” dentro de “TEMPLATES” agregue
+os.path.join(BASE_DIR, 'geoApp','templates'),
+Tendrías algo como lo siguiente:
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+                os.path.join(BASE_DIR, 'geoApp','templates'),
+        ],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]  
+15 - Editar “/geoApp/views.py”, aquí creamos una función de inicio que regresa a nuestra plantilla “home.html”, esta plantilla se crea en el siguiente paso:
+from django.shortcuts import render, redirect
+ # Crea tus vistas aquí.
+# Create your views here.
+def home(request):
+    context={}
+    return render(request,'geoApp/home.html',context)
+16 - Crea un nuevo archivo dentro de la nueva carpeta llamada “geoApp/templates/geoApp /home.html”, pega este código HTML dentro:
+{% load static %}
+ <!DOCTYPE html>
+<html lang="en">
+ <head>
+   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+   <title>GeoGida</title>
+   <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="{% static '/bootstrap/css/bootstrap.min.css' %}">
+ </head>
+ <body>
+   <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+      <a class="navbar-brand" href="#">GeoGida</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="">Welcome</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+   <!-- Page Content -->
+  <div class="container">
+    <div class="row">
+       <div class="col-lg-12 text-center">
+        <h1 class="mt-5">GeoApp developed by Hatarilabs</h1>
+        <p class="lead">You´ll be seeing shapefiles storaged in Database</p>
+         <ul class="list-unstyled">
+          <li>Developed by Hatarilabs</li>
+          <li>2020</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+   <!-- Bootstrap core JavaScript -->
+  <script src="{% static '/jquery/jquery.slim.min.js' %}"></script>
+  <script src="{% static '/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+ </body>
+ </html>
+
+17 - Hasta este punto, ve al kernel y ejecuta tu aplicación.
+python manage.py runserver
+Vaya a localhost y debería poder ver la siguiente interfaz:
+http://127.0.0.1:8000/
+18 - Ahora, agregaremos la vista geoespacial, para hacer esto copie la carpeta "shp" de los datos proporcionados a "media", esto contiene dos archivos ".geojson".
+19 - Modifique el archivo “geoApp/views.py” de la siguiente manera:
+from django.shortcuts import render, redirect
+import os
+import folium
+# Create your views here.
+def home(request):
+    shp_dir = os.path.join(os.getcwd(),'media','shp')
+    # folium
+    m = folium.Map(location=[-16.22,-71.59],zoom_start=10#)
+    ## style
+    style_basin = {'fillColor': '#228B22', 'color': '#228B22'}
+    style_rivers = { 'color': 'blue'}
+    ## adding to view
+    folium.GeoJson(os.path.join(shp_dir,'basin.geojson'),name='basin',style_function=lambda x:style_basin).add_to(m)
+    folium.GeoJson(os.path.join(shp_dir,'rivers.geojson'),name='rivers',style_function=lambda x:style_rivers).add_to(m)
+    folium.LayerControl().add_to(m)
+    ## exporting
+    m=m._repr_html_()
+    context = {'my_map': m}
+    ## rendering
+    return render(request,'geoApp/home.html',context)
+
+20 - Ahora, agregue el mapa al código HTML, abra “home.html” y agregue después de:
+“<p class="lead">Verá archivos de forma almacenados en la base de datos</p>”, el siguiente comando:
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="Tutorial de desarrollo de aplicaciones web geoespaciales con Python y Django"
+    />
+    <meta name="author" content="Guillermo Toranzo Perez" />
+    <title>GeoApp</title>
+    <!-- Bootstrap core CSS -->
+    <link
+      rel="stylesheet"
+      href="{% static '/bootstrap/css/bootstrap.min.css' %}"
+    />
+  </head>
+  <body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+      <div class="container">
+        <a class="navbar-brand" href="#">GeoApp</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarResponsive"
+          aria-controls="navbarResponsive"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item active">
+              <a class="nav-link" href="">Bienvenido</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- Page Content -->
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12 text-center">
+          <h1 class="mt-5">GeoApp desarrollada con Python</h1>
+          <p class="lead">
+            Verás archivos de forma almacenados en la Base de Datos sqlite3.
+          </p>
+          {{ my_map|safe }}
+          <ul class="list-unstyled">
+            <li>
+              Desarrollada por
+              <a href="https://github.com/gtoranzo" target="_blank">gtoranzo</a>
+            </li>
+            <li>2023</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!-- Bootstrap core JavaScript -->
+    <script src="{% static '/jquery/jquery-3.7.1.slim.min.js' %}"></script>
+    <script src="{% static '/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+  </body>
+</html>
+
+
+
+
+
+
